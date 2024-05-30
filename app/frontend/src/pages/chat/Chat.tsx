@@ -68,8 +68,6 @@ const Chat = () => {
 
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: ChatResponse][]>([]);
-    const [answerStream, setAnswerStream] = useState<ReadableStream | undefined>(undefined);
-    const [abortController, setAbortController] = useState<AbortController | undefined>(undefined);
 
     async function fetchFeatureFlags() {
         try {
@@ -119,30 +117,9 @@ const Chat = () => {
                 citation_lookup: approach == Approaches.CompareWebWithWork ? web_citation_lookup : approach == Approaches.CompareWorkWithWeb ? work_citation_lookup : {},
                 thought_chain: thought_chain
             };
-
-            const temp: ChatResponse = {
-                answer: "",
-                thoughts: "",
-                data_points: [],
-                approach: approach,
-                thought_chain: {
-                    "work_response": "",
-                    "web_response": ""
-                },
-                work_citation_lookup: {},
-                web_citation_lookup: {}
-            };
-
-            setAnswers([...answers, [question, temp]]);
-            const controller = new AbortController();
-            setAbortController(controller);
-            const signal = controller.signal;
-            const result = await chatApi(request, signal);
-            if (!result.body) {
-                throw Error("No response body");
-            }
-
-            setAnswerStream(result.body);
+            const result = await chatApi(request);
+            result.approach = approach;
+            setAnswers([...answers, [question, result]]);
         } catch (e) {
             setError(e);
         } finally {
@@ -240,7 +217,6 @@ const Chat = () => {
     };
 
     const onChatModeChange = (_ev: any) => {
-        abortController?.abort();
         const chatMode = _ev.target.value as ChatMode || ChatMode.WorkOnly;
         setChatMode(chatMode);
         if (chatMode == ChatMode.WorkOnly)
@@ -323,19 +299,6 @@ const Chat = () => {
         };
     }, []);
 
-    const updateAnswerAtIndex = (index: number, response: ChatResponse) => {
-        setAnswers(currentAnswers => {
-            const updatedAnswers = [...currentAnswers];
-            updatedAnswers[index] = [updatedAnswers[index][0], response];
-            return updatedAnswers;
-        });
-    }
-
-    const removeAnswerAtIndex = (index: number) => {
-        const newItems = answers.filter((item, idx) => idx !== index);
-        setAnswers(newItems);
-    }
-
     return (
         <div className={styles.container}>
             <div className={styles.subHeader}>
@@ -394,9 +357,6 @@ const Chat = () => {
                                         <Answer
                                             key={index}
                                             answer={answer[1]}
-                                            answerStream={answerStream}
-                                            setError={(error) => {setError(error); removeAnswerAtIndex(index); }}
-                                            setAnswer={(response) => updateAnswerAtIndex(index, response)}
                                             isSelected={selectedAnswer === index && activeAnalysisPanelTab !== undefined}
                                             onCitationClicked={(c, s, p) => onShowCitation(c, s, p, index)}
                                             onThoughtProcessClicked={() => onToggleTab(AnalysisPanelTabs.ThoughtProcessTab, index)}
@@ -414,6 +374,17 @@ const Chat = () => {
                                     </div>
                                 </div>
                             ))}
+                            {isLoading && (
+                                <>
+                                    <UserChatMessage
+                                        message={lastQuestionRef.current}
+                                        approach={activeApproach}
+                                    />
+                                    <div className={styles.chatMessageGptMinWidth}>
+                                        <AnswerLoading approach={activeApproach}/>
+                                    </div>
+                                </>
+                            )}
                             {error ? (
                                 <>
                                     <UserChatMessage message={lastQuestionRef.current} approach={activeApproach}/>

@@ -25,6 +25,7 @@ interface Props {
 
 const Tda = ({folderPath, tags}: Props) => {
   const [streamKey, setStreamKey] = useState(0);
+  const [dots, setDots] = useState('');
   const [files, setFiles] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const [uploadStarted, setUploadStarted] = useState(false);
@@ -35,7 +36,7 @@ const Tda = ({folderPath, tags}: Props) => {
   const [otherq, setOtherq] = useState('');
   const [selectedQuery, setSelectedQuery] = useState('');
   const [dataFrame, setDataFrame] = useState<object[]>([]);
-  const [renderAnswer, setRenderAnswer] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [fileu, setFile] = useState<File | null>(null);
   const [images, setImages] = useState<string[]>([]);
@@ -59,6 +60,14 @@ interface Props {
     onExampleClicked: (value: string) => void;
 }
 
+useEffect(() => {
+  const intervalId = setInterval(() => {
+    setDots(prevDots => (prevDots.length < 3 ? prevDots + '.' : ''));
+  }, 500); // Change dot every 500ms
+
+  return () => clearInterval(intervalId); // Cleanup interval on component unmount
+}, [loading]);
+
 const fetchImages = async () => {
   console.log('fetchImages called');
   const tempImages = await getTempImages();
@@ -76,7 +85,7 @@ const fetchImages = async () => {
   const handleAnalysis = () => {
     setImages([])
     setOutput('');
-    setRenderAnswer(true);
+    setLoading(true);
     setTimeout(async () => {
       try {
         const query = setOtherQ(selectedQuery);
@@ -90,10 +99,11 @@ const fetchImages = async () => {
           setStreamKey(prevKey => prevKey + 1);
         } else {
           setOutput("no file file has been uploaded.")
+          setLoading(false);
         }
       } catch (error) {
         console.log(error);
-        setRenderAnswer(false);
+        setLoading(false);
       }
     }, 0);
   };
@@ -110,9 +120,10 @@ const fetchImages = async () => {
         setImages([])
         const query = setOtherQ(selectedQuery);
         setOutput('');
-        setRenderAnswer(true);
+        setLoading(true);
         if (fileu) {
           const result = await processCsvAgentResponse(query, fileu);
+          setLoading(false);
           setOutput(result.toString());
           fetchImages();
           return;
@@ -120,6 +131,7 @@ const fetchImages = async () => {
         }
         else {
           setOutput("no file file has been uploaded.")
+          setLoading(false);
         }
       } catch (error) {
         lastError = error;
@@ -127,6 +139,7 @@ const fetchImages = async () => {
     }
   // If the code reaches here, all retries have failed. Handle the error as needed.
     console.error(lastError);
+    setLoading(false);
     setOutput('An error occurred.');
   };
 
@@ -242,6 +255,7 @@ const fetchImages = async () => {
         }
         else {
           setOutput("no file file has been uploaded.")
+          setLoading(false);
         }
       }
   }, [selectedQuery]);
@@ -260,6 +274,7 @@ const handleCloseEvent = () => {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
       fetchImages();
+      setLoading(false);
       console.log('EventSource closed');
   }
 }
@@ -389,12 +404,12 @@ const handleCloseEvent = () => {
     <Button variant="secondary" onClick={handleAnalysis}>Here is my analysis</Button>
     <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
+    {loading && <div className="spinner">Loading{dots}</div>}
     { (
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
         <div>
-          { renderAnswer && 
-          <CharacterStreamer key={streamKey} eventSource={eventSourceRef.current} classNames={cstyle.centeredAnswerContainer} nonEventString={output} onStreamingComplete={handleCloseEvent} typingSpeed={10} /> }
+          <CharacterStreamer key={streamKey} eventSource={eventSourceRef.current} classNames={cstyle.centeredAnswerContainer} nonEventString={output} onStreamingComplete={handleCloseEvent} typingSpeed={10} />
         </div>
         <h2>Generated Images:</h2>
         <div>

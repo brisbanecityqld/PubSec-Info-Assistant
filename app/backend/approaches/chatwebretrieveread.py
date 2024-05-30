@@ -1,8 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-import json
-import logging
 import os
 import re
 from typing import Any, Sequence
@@ -11,8 +9,6 @@ from web_search_client import WebSearchClient
 from web_search_client.models import SafeSearch
 from azure.core.credentials import AzureKeyCredential
 import openai
-from openai import AzureOpenAI
-from openai import AsyncAzureOpenAI
 from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
@@ -84,16 +80,6 @@ class ChatWebRetrieveRead(Approach):
         self.bing_search_key = bing_search_key
         self.bing_safe_search = bing_safe_search
         
-        # openai.api_base = oai_endpoint
-        openai.api_type = 'azure'
-        openai.api_version = "2024-02-01"
-       
-         
-        self.client = AsyncAzureOpenAI(
-        azure_endpoint = openai.api_base , 
-        api_key=openai.api_key,  
-        api_version=openai.api_version)
-        
 
     async def run(self, history: Sequence[dict[str, str]],overrides: dict[str, Any], citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
         """
@@ -106,11 +92,7 @@ class ChatWebRetrieveRead(Approach):
         Returns:
             Any: The result of the approach.
         """
-        log = logging.getLogger("uvicorn")
-        log.setLevel('DEBUG')
-        log.propagate = True
-        
-        query_resp = None
+
         user_query = history[-1].get("user")
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
@@ -133,13 +115,7 @@ class ChatWebRetrieveRead(Approach):
             self.chatgpt_token_limit - len(user_query)
             )
         
-        try:
-            query_resp = await self.make_chat_completion(messages)
-        except Exception as e:
-            log.error(f"Error generating optimized keyword search: {str(e)}")
-            yield json.dumps({"error": f"Error generating optimized keyword search: {str(e)}"}) + "\n"
-            return
-        
+        query_resp = await self.make_chat_completion(messages)
         thought_chain["web_search_term"] = query_resp
         # STEP 2: Use the search query to get the top web search results
         url_snippet_dict = await self.web_search_with_safe_search(query_resp)
@@ -164,35 +140,18 @@ class ChatWebRetrieveRead(Approach):
             self.RESPONSE_PROMPT_FEW_SHOTS,
              max_tokens=4097 - 500
          )
-
         msg_to_display = '\n\n'.join([str(message) for message in messages])
-        try:
-            # STEP 3: Use the search results to answer the user's question
-            resp = await self.client.chat.completions.create(
-                model=self.chatgpt_deployment,
-                messages=messages,
-                temperature=0.6,
-                n=1,
-                stream=True
-            ) 
-            
-            # Return the data we know
-            yield json.dumps({"data_points": {},
-                            "thoughts": f"Searched for:<br>{query_resp}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-                            "thought_chain": thought_chain,
-                            "work_citation_lookup": {},
-                            "web_citation_lookup": self.citations}) + "\n"
-            
-            # STEP 4: Format the response
-            async for chunk in resp:
-                # Check if there is at least one element and the first element has the key 'delta'
-                if len(chunk.choices) > 0:
-                    yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
-        
-        except Exception as e:
-            log.error(f"Error generating chat completion: {str(e)}")
-            yield json.dumps({"error": f"Error generating chat completion: {str(e)}"}) + "\n"
-            return
+        # STEP 3: Use the search results to answer the user's question
+        resp = await self.make_chat_completion(messages)  
+        thought_chain["web_response"] = resp
+        return {
+            "data_points": None,
+            "answer": f"{urllib.parse.unquote(resp)}",
+            "thoughts": f"Searched for:<br>{query_resp}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
+            "thought_chain": thought_chain,
+            "work_citation_lookup": {},
+            "web_citation_lookup": self.citations
+        }
     
 
     async def web_search_with_safe_search(self, user_query):
@@ -250,9 +209,9 @@ class ChatWebRetrieveRead(Approach):
             str: The generated chat completion response.
         """
 
-        
-        chat_completion= await self.client.chat.completions.create(
-            model=self.chatgpt_deployment,
+        chat_completion = await openai.ChatCompletion.acreate(
+            deployment_id=self.chatgpt_deployment,
+            model=self.model_name,
             messages=messages,
             temperature=0.6,
             n=1

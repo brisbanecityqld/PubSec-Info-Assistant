@@ -19,7 +19,7 @@ import { ChatResponse,
     getMaxCSVFileSizeType,
     } from "./models";
 
-export async function chatApi(options: ChatRequest, signal: AbortSignal): Promise<Response> {
+export async function chatApi(options: ChatRequest): Promise<ChatResponse> {
     const response = await fetch("/chat", {
         method: "POST",
         headers: {
@@ -49,15 +49,15 @@ export async function chatApi(options: ChatRequest, signal: AbortSignal): Promis
             },
             citation_lookup: options.citation_lookup,
             thought_chain: options.thought_chain
-        }),
-        signal: signal
+        })
     });
 
+    const parsedResponse: ChatResponse = await response.json();
     if (response.status > 299 || !response.ok) {
-        throw Error("Unknown error");
+        throw Error(parsedResponse.error || "Unknown error");
     }
    
-    return response;
+    return parsedResponse;
 }
 
 export function getCitationFilePath(citation: string): string {

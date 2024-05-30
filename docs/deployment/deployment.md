@@ -29,13 +29,9 @@ Once you have the completed setting up a GitHub Codespaces, please move on to th
 
  The IA Accelerator needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](/docs/costestimator.md) to help find the configuration that fits your needs.
 
- To change the size of components deployed, make changes in the [Terraform Variables](/infra/variables.tf) file.
+ To change the size of components deployed, make changes in the [Main Bicep](/infra/main.bicep) file.
 
 Once you have completed the Sizing Estimator and sized your deployment appropriately, please move on to the Configuring your Environment step.
-
-## Upgrading or Migrating from 1.0
-
-If you have an existing 1.0 deployment and you are looking to upgrade that deployment in place, or migrate your existing processed data to a newly deployed instance, review the [Upgrade & Migrate documentation](/docs/deployment/move_or_migrate.md)
 
 ## Configure ENV files
 
@@ -48,7 +44,7 @@ Inside your Development environment (GitHub Codespaces or Container), do the fol
 
 Variable | Required | Description
 --- | --- | ---
-LOCATION | Yes | The location (West Europe is the default). The Terraform templates use this value. To get a list of all the current Azure regions you can run `az account list-locations -o table`. The value here needs to be the *Name* value and not *Display Name*.
+LOCATION | Yes | The location (West Europe is the default). The BICEP templates use this value. To get a list of all the current Azure regions you can run `az account list-locations -o table`. The value here needs to be the *Name* value and not *Display Name*.
 WORKSPACE | Yes  | The workspace name (use something simple and unique to you). This will appended to infoasst-????? as the name of the resource group created in your subscription.
 SUBSCRIPTION_ID | Yes | The GUID that represents the Azure Subscription you want the Accelerator to be deployed into. This can be obtained from the *Subscription* blade in the Azure Portal.
 TENANT_ID | Yes | The GUID that represents the Azure Active Directory Tenant for the Subscription you want the accelerator to be deployed into. This can be obtained from the *Tenant Info* blade in the Azure Portal.
@@ -63,8 +59,8 @@ ENABLE_SHAREPOINT_CONNECTOR | Yes | Defaults to `false`. This feature flag enabl
 SHAREPOINT_TO_SYNC | No | This is a JSON Array of Objects for SharePoint Sites and their entry folders. The app will crawl down from the folder specified for each site. Specifying "/Shared Documents" will crawl all the documents in your SharePoint. `[{"url": "https://SharePoint.com/", "folder": "/Shared Documents"}]` This will **overwrite** any prior changes you've made to config.json. Information on setting up SharePoint Ingestion can be found here [SharePoint Connector](/docs/features/sharepoint.md)
 ENABLE_MULTIMEDIA | Yes | Defaults to `false`. This feature flag should not be changed at this time. The multimedia feature is still in development. Enabling this feature will deploy an Azure Video Indexer instance in your resource group only.
 REQUIRE_WEBSITE_SECURITY_MEMBERSHIP | Yes | Use this setting to determine whether a user needs to be granted explicit access to the website via an Azure AD Enterprise Application membership (true) or allow the website to be available to anyone in the Azure tenant (false). Defaults to false. If set to true, A tenant level administrator will be required to grant the implicit grant workflow for the Azure AD App Registration manually.
-SKIP_PLAN_CHECK | No | If this value is set to 1, then the Terraform deployment will not stop to allow you to review the planned changes. The default value is 0 in the scripts, which will allow the deployment to stop and confirm you accept the proposed changes before continuing.
-USE_EXISTING_AOAI | Yes | Defaults to false. Set this value to "true" if you want to use an existing Azure Open AI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. When the value is set to "false" and Terraform will create a new Azure Open AI service instance in your resource group.
+SKIP_PLAN_CHECK | No | If this value is set to 1, then the BICEP deployment will not stop to allow you to review the planned changes. The default value is 0 in the scripts, which will allow the deployment to stop and confirm you accept the proposed changes before continuing.
+USE_EXISTING_AOAI | Yes | Defaults to false. Set this value to "true" if you want to use an existing Azure Open AI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. When the value is set to "false" and BICEP will create a new Azure Open AI service instance in your resource group.
 AZURE_OPENAI_RESOURCE_GROUP | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the resource group that hosts the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_SERVICE_NAME | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_SERVICE_KEY | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the Key for the Azure Open AI service instance in your subscription.
@@ -84,10 +80,6 @@ DEFAULT_LANGUAGE | Yes | Use the parameter to specify the matching ENV file loca
 ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By default, **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** is set to `true`. The CUA GUID which is pre-configured will tell Microsoft about the usage of this software. Please see [Data Collection Notice](/README.md#data-collection-notice) for more information. <br/><br/>You may provide your own CUA GUID by changing the value in **CUSTOMER_USAGE_ATTRIBUTION_ID**. Ensure you understand how to properly notify your customers by reading <https://learn.microsoft.com/en-us/partner-center/marketplace/azure-partner-customer-usage-attribution#notify-your-customers>.<br/><br/>To disable data collection, set **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** to `false`.
 ENABLE_DEV_CODE | No | Defaults to `false`. It is not recommended to enable this flag, it is for development testing scenarios only.
 APPLICATION_TITLE | No | Defaults to "". Providing a value for this parameter will replace the Information Assistant's title in the black banner at the top of the UX.
-ENTRA_OWNERS | No | Defaults to "". Additional user id's you wish to assign as owners of created Azure Entra objects by way of assign to a security group.
-SERVICE_MANAGEMENT_REFERENCE | No | Defaults to "". Sets the service management reference value on Azure Entra objects created by Information Assistant if required by your organization.
-MAX_CSV_FILE_SIZE | Yes | Defaults to 20. This value limits the size of CSV files in MBs that will be supported for upload in the Tabular Data Assistant UX feature.
-PASSWORD_LIFETIME | No | Defaults to 365. The number of days that passwords associated with created identities are set to expire after creation. Change this setting if needed to conform to you policy requirements
 
 ## Log into Azure using the Azure CLI
 
@@ -149,21 +141,14 @@ help                         Show this help
 deploy                       Deploy infrastructure and application code
 build                        Build application code
 infrastructure               Deploy infrastructure
-extract-env                  Extract infrastructure.env file from Terraform output
+extract-env                  Extract infrastructure.env file from BICEP output
 deploy-webapp                Deploys the web app code to Azure App Service
 deploy-functions             Deploys the function code to Azure Function Host
 deploy-enrichments           Deploys the web app code to Azure App Service
 deploy-search-indexes        Deploy search indexes
-extract-env-debug-webapp     Extract infrastructure.debug.env file from Terraform output
-extract-env-debug-functions  Extract local.settings.json to debug functions from Terraform output
+extract-env-debug-webapp     Extract infrastructure.debug.env file from BICEP output
+extract-env-debug-functions  Extract local.settings.json to debug functions from BICEP output
 functional-tests             Run functional tests to check the processing pipeline is working
-merge-databases              Upgrade from bicep to terraform
-import-state                 import state of current services to TF state
-prep-upgrade                 Command to merge databases and import TF state in prep for an upgrade from 1.0 to 1.n
-prep-env                     Apply role assignments as needed to upgrade
-prep-migration-env           Prepare the environment for migration by assigning required roles
-run-data-migration           Run the data migration moving data from one resource group to another
-manual-inf-destroy           A command triggered by a user to destroy a resource group, associated resources, and related Entra items
 ```
 
 ## Configure authentication and authorization

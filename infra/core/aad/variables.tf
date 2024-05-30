@@ -32,18 +32,3 @@ variable "aadMgmtClientSecret" {
   type      = string
   sensitive = true
 }
-
-variable "entraOwners" {
-  type    = string
-  default = ""
-  description = "Comma-separated list of owner emails"
-}
-
-variable "serviceManagementReference" {
-  type      = string
-  sensitive = true
-}
-
-variable "password_lifetime" {
-  type      = number
-}
