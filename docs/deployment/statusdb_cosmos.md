@@ -1,3 +1,5 @@
+# Investigating File Processing Errors in CosmosDB Logs
+
 ## Navigating to Azure Resource Group and Opening Cosmos Account Resource
 
 >1. Log in to the Azure portal.
@@ -5,14 +7,14 @@
 >3. Select the desired resource group from the list.
 >4. In the resource group overview, locate and click on the Cosmos account resource.
 
-![Alt text](/docs/images/cosmos_account.png)
+![CosmosDB Azure Portal Blade View](/docs/images/cosmos_account.png)
 
 ## Accessing Data Explorer
 
 >1. Once you are on the Cosmos account resource page, navigate to the left-hand menu.
 >2. Under the "Settings" section, click on "Data Explorer".
 
-![Alt text](/docs/images/data_explorer.png)
+![CosmosDB Azure Portal Data Explorer View](/docs/images/data_explorer.png)
 
 ## Expanding the Database
 

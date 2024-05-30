@@ -19,6 +19,8 @@ const FilePicker = ({folderPath, tags}: Props) => {
   const [files, setFiles] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const [uploadStarted, setUploadStarted] = useState(false);
+  const folderName = folderPath;
+  const tagList = tags;
 
   // handler called when files are selected via the Dropzone component
   const handleOnChange = useCallback((files: any) => {
@@ -58,12 +60,12 @@ const FilePicker = ({folderPath, tags}: Props) => {
       files.forEach(async (indexedFile: any) => {
         // add each file into Azure Blob Storage
         var file = indexedFile.file as File;
-        var filePath = (folderPath == "") ? file.name : folderPath + "/" + file.name;
+        var filePath = (folderName == "") ? file.name : folderName + "/" + file.name;
         const blobClient = containerClient.getBlockBlobClient(filePath);
         // set mimetype as determined from browser with file upload control
         const options = {
           blobHTTPHeaders: { blobContentType: file.type },
-          metadata: { tags: tags.map(encodeURIComponent).join(",") }
+          metadata: { tags: tagList.map(encodeURIComponent).join(",") }
         };
 
         // upload file
@@ -85,7 +87,7 @@ const FilePicker = ({folderPath, tags}: Props) => {
     } catch (error) {
       console.log(error);
     }
-  }, [files, folderPath, tags]);
+  }, [files.length]);
 
   // set progress to zero when there are no files
   useEffect(() => {

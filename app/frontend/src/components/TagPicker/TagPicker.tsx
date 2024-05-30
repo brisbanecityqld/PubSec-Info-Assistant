@@ -17,10 +17,9 @@ interface Props {
     allowNewTags?: boolean;
     onSelectedTagsChange: (selectedTags: ITag[]) => void;
     preSelectedTags?: ITag[];
-    hide?: boolean;
 }
 
-export const TagPickerInline = ({allowNewTags, onSelectedTagsChange, preSelectedTags, hide}: Props) => {
+export const TagPickerInline = ({allowNewTags, onSelectedTagsChange, preSelectedTags}: Props) => {
 
     const pickerId = useId('tag-inline-picker');
     const tooltipId = useId('tagpicker-tooltip');
@@ -126,7 +125,7 @@ export const TagPickerInline = ({allowNewTags, onSelectedTagsChange, preSelected
   }, []);
     
     return (
-      <div  className={hide? styles.hide : styles.tagArea}>
+      <div className={styles.tagArea}>
         <div className={styles.tagSelection}>
           <div className={allowAddNew ? styles.rootClass : styles.rootClassFilter}>
             <label htmlFor={pickerId}>Tags</label>

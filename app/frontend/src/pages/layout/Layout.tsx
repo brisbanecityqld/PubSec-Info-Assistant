@@ -2,30 +2,13 @@
 // Licensed under the MIT license.
 
 import { Outlet, NavLink, Link } from "react-router-dom";
+
 import openai from "../../assets/openai.svg";
 import { WarningBanner } from "../../components/WarningBanner/WarningBanner";
 import styles from "./Layout.module.css";
 import { Title } from "../../components/Title/Title";
-import { getFeatureFlags, GetFeatureFlagsResponse } from "../../api";
-import { useEffect, useState } from "react";
 
-export const Layout = () => {
-    const [featureFlags, setFeatureFlags] = useState<GetFeatureFlagsResponse | null>(null);
-
-    async function fetchFeatureFlags() {
-        try {
-            const fetchedFeatureFlags = await getFeatureFlags();
-            setFeatureFlags(fetchedFeatureFlags);
-        } catch (error) {
-            // Handle the error here
-            console.log(error);
-        }
-    }
-
-    useEffect(() => {
-        fetchFeatureFlags();
-    }, []);
-
+const Layout = () => {
     return (
         <div className={styles.layout}>
             <header className={styles.header} role={"banner"}>
@@ -33,7 +16,7 @@ export const Layout = () => {
                 <div className={styles.headerContainer}>
                     <div className={styles.headerTitleContainer}>
                         <img src={openai} alt="Azure OpenAI" className={styles.headerLogo} />
-                        <h3 className={styles.headerTitle}><Title /></h3>
+                        <h3 className={styles.headerTitle}><Title/></h3>
                     </div>
                     <nav>
                         <ul className={styles.headerNavList}>
@@ -47,30 +30,13 @@ export const Layout = () => {
                                     Manage Content
                                 </NavLink>
                             </li>
-                            {featureFlags?.ENABLE_MATH_ASSISTANT &&
-                                <li className={styles.headerNavLeftMargin}>
-                                    <NavLink to="/tutor" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Math Assistant
-                                    <br />  
-                                    <p className={styles.centered}>(preview)</p>
-                                    </NavLink>
-                                </li>
-                            }
-                            {featureFlags?.ENABLE_TABULAR_DATA_ASSISTANT &&
-                                <li className={styles.headerNavLeftMargin}>
-                                    <NavLink to="/tda" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Tabular Data Assistant
-                                    <br />  
-                                    <p className={styles.centered}>(preview)</p>
-                                    </NavLink>
-                                    
-                                      
-                                </li>
-                            }
-                    </ul>
+                        </ul>
                     </nav>
                 </div>
             </header>
+            <div className={styles.raibanner}>
+                <span className={styles.raiwarning}>AI-generated content may be incorrect</span>
+            </div>
 
             <Outlet />
 
@@ -80,3 +46,5 @@ export const Layout = () => {
         </div>
     );
 };
+
+export default Layout;

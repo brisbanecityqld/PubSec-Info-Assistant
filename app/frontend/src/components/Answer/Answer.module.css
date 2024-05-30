@@ -9,85 +9,8 @@
     outline: transparent solid 1px;
 }
 
-.answerContainerWork {
-    padding: 20px;
-    background: rgb(249, 249, 249);
-    border-radius: 8px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
-    outline: #1B4AEF solid 1px;
-}
-
-.answerContainerWeb {
-    padding: 20px;
-    background: rgb(249, 249, 249);
-    border-radius: 8px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
-    outline: #188d45 solid 1px;
-}
-
-.answerContainerCompare {
-    padding: 20px;
-    background: rgb(249, 249, 249);
-    border-radius: 8px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
-    outline: #ce7b2e solid 1px;
-}
-
-.answerContainerUngrounded {
-    padding: 20px;
-    background: transparent;
-    outline: transparent;
-}
-
-.warningText {
-    color: rgb(182, 91, 114);
-    font-weight: bold;
-    text-decoration: underline;
-    text-align: center;
-}
-
-.answerLogoWeb {
-    font-size: 22px;
-    color: #188d45;
-    white-space: break-spaces;
-    word-break: break-word;
-    display: flex;
-    align-items: center;
-}
-
-.answerLogoWork {
-    font-size: 22px;
-    color: #1B4AEF;
-    white-space: break-spaces;
-    word-break: break-word;
-    display: flex;
-    align-items: center;
-}
-
-.answerLogoCompare {
-    font-size: 22px;
-    color: #ce7b2e;
-    white-space: break-spaces;
-    word-break: break-word;
-    display: flex;
-    align-items: center;
-}
-
-.answerLogoUngrounded {
-    font-size: 22px;
-    color: rgba(0, 0, 0, 1);
-    white-space: break-spaces;
-    word-break: break-word;
-    display: flex;
-    align-items: center;
-}
-
-.answerLogoUngroundedText {
-    padding-left: 10px;
-    font-size: 16px;
-    line-height: 22px;
-    font-weight: 700;
-    font-variation-settings: unset;
+.answerLogo {
+    font-size: 28px;
 }
 
 .answerText {
@@ -97,16 +20,6 @@
     padding-top: 16px;
     padding-bottom: 16px;
     white-space: pre-line;
-}
-
-.answerTextUngrounded {
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 22px;
-    padding-top: 16px;
-    padding-bottom: 16px;
-    white-space: pre-line;
-    padding-left: 36px;
 }
 
 .selected {
@@ -119,7 +32,7 @@
     line-height: 24px;
 }
 
-.citationWork {
+.citation {
     font-weight: 500;
     line-height: 24px;
     text-align: center;
@@ -131,39 +44,7 @@
     cursor: pointer;
 }
 
-.citationWork:hover {
-    text-decoration: underline;
-}
-
-.citationWeb {
-    font-weight: 500;
-    line-height: 24px;
-    text-align: center;
-    border-radius: 4px;
-    padding: 0px 8px;
-    background: #d1fad8;
-    color: #123bb6;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.citationWeb:hover {
-    text-decoration: underline;
-}
-
-.citationCompare {
-    font-weight: 500;
-    line-height: 24px;
-    text-align: center;
-    border-radius: 4px;
-    padding: 0px 8px;
-    background: #fae3d1;
-    color: #123bb6;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.citationCompare:hover {
+.citation:hover {
     text-decoration: underline;
 }
 
@@ -190,21 +71,12 @@
     cursor: pointer;
 }
 
-.supContainerWeb {
+.supContainer {
     text-decoration: none;
     cursor: pointer;
 }
 
-.supContainerWeb:hover {
-    text-decoration: underline;
-}
-
-.supContainerWork {
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.supContainerWork:hover {
+.supContainer:hover {
     text-decoration: underline;
 }
 
@@ -253,17 +125,4 @@ sup {
 .loadingdots::after {
     content: "";
     animation: loading 1s infinite;
-}
-
-.raiwarning {
-    font-size: 12px;
-    font-weight: 400;
-    color: rgb(133, 133, 133);
-    line-height: 22px;
-    padding-top: 6px;
-    padding-bottom: 6px;
-    white-space: pre-line;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
 }
